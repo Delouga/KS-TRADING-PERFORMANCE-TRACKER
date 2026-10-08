@@ -23,7 +23,7 @@ jobs:
         run: npm install
 
       - name: Construire l'application Electron
-        run: npm run dist
+        run: npm run dist -- --publish never
 
       - name: Publier le Setup Windows
         uses: actions/upload-artifact@v4
