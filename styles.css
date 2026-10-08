@@ -1,0 +1,176 @@
+:root {
+  --bg: #3f3f3f;
+  --cell: #262626;
+  --cell2: #333333;
+  --orange: #ff9c28;
+  --yellow: #ffff00;
+  --green: #70ad47;
+  --greenlight: #a9d18e;
+  --txt: #ffffff;
+  --muted: #d9d9d9;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: Calibri, "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#view { flex: 1; overflow: auto; position: relative; }
+
+/* ---------- Onglets du bas ---------- */
+#tabs {
+  display: flex;
+  gap: 0;
+  background: #e6e6e6;
+  border-top: 1px solid #bdbdbd;
+  padding: 3px 8px 0;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+#tabs button {
+  border: 0;
+  border-left: 1px solid #c8c8c8;
+  background: transparent;
+  color: #222;
+  font: 13px Calibri, "Segoe UI", Arial, sans-serif;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#tabs button:hover { background: #d4d4d4; }
+#tabs button.tab-green { background: #70ad47; color: #fff; }
+#tabs button.tab-orange { background: #ed7d31; color: #fff; }
+#tabs button.active { background: #fff; color: #217346; font-weight: 700; box-shadow: inset 0 -2px 0 #217346; }
+#tabs button.tab-green.active { background: #a9d18e; color: #1b5e20; }
+#tabs button.tab-orange.active { background: #f4b183; color: #7a3800; }
+
+/* ---------- En-tête logo ---------- */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  background: #3f3f3f;
+  border-bottom: 3px solid #1a1a1a;
+  padding: 0 20px 0 0;
+  height: 142px;
+}
+.banner img { height: 142px; display: block; }
+.banner .quotes { font-size: 20px; font-weight: 700; font-style: italic; line-height: 1.5; }
+.banner .yearbox { margin-left: auto; color: var(--muted); font-size: 13px; }
+.banner input.year { width: 64px; background: var(--cell); color: #fff; border: 1px solid #666; padding: 3px 6px; font: inherit; text-align: center; }
+
+/* ---------- En-têtes orange / jaune ---------- */
+.hd {
+  background: var(--orange);
+  color: #000;
+  font-weight: 700;
+  font-style: italic;
+  text-align: center;
+  padding: 4px 6px;
+  border: 1px solid #1a1a1a;
+}
+.hd.yellow { background: var(--yellow); }
+.val {
+  background: var(--cell);
+  border: 1px solid #1a1a1a;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+/* ---------- Mise en page P&L OUTLOOK ---------- */
+.outlook { display: grid; grid-template-columns: 700px minmax(640px, 1fr) 340px 340px; align-items: start; min-width: 2100px; }
+.outlook > .col { min-width: 0; }
+.chart {
+  background: radial-gradient(ellipse at 50% 0%, #5a5a5a 0%, #333 55%, #262626 100%);
+  position: relative;
+  overflow: hidden;
+}
+.chart.h-lg { height: 380px; }
+.chart.h-md { height: 300px; }
+.chart.h-sm { height: 190px; }
+.chart.h-donut { height: 220px; }
+
+.clients table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.clients td, .clients th { border: 1px solid #1a1a1a; padding: 0; height: 21px; }
+.clients th { height: 24px; }
+.clients td.m { background: var(--cell); text-align: center; font-weight: 700; }
+.clients td.bal { background: var(--cell); text-align: right; padding: 0 6px; font-style: italic; }
+.clients td.name {
+  background: var(--cell2);
+  width: 56px;
+  text-align: center;
+  vertical-align: middle;
+}
+.clients td.name span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 22px;
+  font-weight: 700;
+  display: inline-block;
+  outline: none;
+  min-height: 60px;
+}
+.clients td.total { background: var(--greenlight); color: #000; text-align: center; font-weight: 700; font-style: italic; font-size: 22px; }
+.clients td.risk { background: var(--cell); text-align: center; }
+.clients input {
+  width: 100%;
+  height: 100%;
+  background: var(--cell);
+  color: #fff;
+  border: 0;
+  padding: 0 6px;
+  font: italic 14px Calibri, "Segoe UI", Arial, sans-serif;
+  text-align: right;
+}
+.clients input.c { text-align: center; }
+.clients input:focus, .tl input:focus { outline: 2px solid #21a366; outline-offset: -2px; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; padding: 6px 0 10px; color: var(--muted); }
+.kpis .v { color: #fff; margin-top: 4px; }
+.kpis .g { color: #a9d18e; }
+
+.notes-box { padding: 10px 0 0; }
+.notes-box h3 { margin: 0; background: #7f6000; padding: 4px 10px; font-size: 18px; }
+.notes-box textarea { width: 100%; height: 110px; resize: vertical; background: var(--cell); color: #fff; border: 1px solid #1a1a1a; padding: 8px; font: 14px Calibri, "Segoe UI", Arial, sans-serif; }
+.quarters { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.quarters td { border: 1px solid #1a1a1a; background: var(--cell); padding: 4px 10px; }
+.quarters td:first-child { font-weight: 700; width: 60px; text-align: center; }
+
+/* ---------- Feuilles mensuelles ---------- */
+.month-title { margin: 0; padding: 18px 28px; font-size: 32px; font-weight: 700; border-bottom: 3px solid #1a1a1a; letter-spacing: .5px; }
+.month { display: grid; grid-template-columns: 670px 600px; min-width: 1270px; align-items: start; }
+.month .row3 { display: grid; grid-template-columns: 82px 1fr 82px 1fr 128px 1fr; }
+.month .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); }
+.month .grid5 .val { font-size: 15px; }
+.month .row3 .hd { text-align: left; white-space: nowrap; }
+
+/* ---------- TRADE LOG ---------- */
+.tl-head { display: flex; align-items: center; gap: 0; background: #3f3f3f; border-bottom: 3px solid #1a1a1a; }
+.tl-head img { height: 142px; display: block; }
+.tl-risk { display: flex; margin: 0 0 0 0; }
+.tl-wrap { overflow: auto; height: calc(100% - 190px); }
+.tl { border-collapse: collapse; }
+.tl th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--orange); color: #000; font-weight: 700; font-style: italic;
+  border: 1px solid #1a1a1a; padding: 3px 8px; white-space: nowrap; font-size: 13px;
+}
+.tl th.y { background: var(--yellow); }
+.tl td { border: 1px solid #5b5b5b; padding: 0; height: 20px; min-width: 76px; text-align: center; font-size: 13px; }
+.tl td.c0 { background: #aeaaaa; color: #000; }
+.tl td.c1 { background: #e7e6e6; color: #000; }
+.tl td.in { background: #ffffff; }
+.tl td.in.g { background: #aeaaaa; }
+.tl input { width: 100%; height: 100%; border: 0; background: transparent; text-align: center; font: 13px Calibri, "Segoe UI", Arial, sans-serif; color: #000; padding: 0 4px; }
+.tl .gap { min-width: 22px; width: 22px; background: var(--bg); border: 0; }
+.tl-add { margin: 10px; padding: 7px 14px; background: var(--orange); border: 0; font-weight: 700; cursor: pointer; }
+.risk-label { background: var(--orange); color: #000; font-weight: 700; padding: 10px 16px; border: 1px solid #1a1a1a; }
+.risk-input { background: var(--cell); color: #fff; border: 1px solid #1a1a1a; padding: 10px 14px; width: 150px; text-align: right; font: 15px Calibri, "Segoe UI", Arial, sans-serif; }
+
+.kpis input.year { background: transparent; color: #fff; border: 0; border-bottom: 1px solid #777; text-align: center; font: 14px Calibri, "Segoe UI", Arial, sans-serif; }
