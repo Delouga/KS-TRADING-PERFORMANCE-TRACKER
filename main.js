@@ -404,6 +404,15 @@ ipcMain.handle(
         }
       );
 
+      // Copie de sécurité unique de l'ancien fichier (1 seule année) avant sa conversion multi-années
+      try {
+        if (fs.existsSync(dataFile())) {
+          const ancien = fs.readFileSync(dataFile(), 'utf8');
+          const copie = path.join(path.dirname(dataFile()), 'donnees-avant-multi-annees.json');
+          if (!ancien.includes('"years"') && !fs.existsSync(copie)) fs.writeFileSync(copie, ancien, 'utf8');
+        }
+      } catch (e) { /* sans gravité */ }
+
       fs.writeFileSync(
         tmp,
         JSON.stringify(data),

@@ -1,4 +1,4 @@
-/* Calculs : reproduisent les formules du classeur Excel d'origine. */
+/* Calculs : modèle connecté TRADE LOG -> P&L OUTLOOK -> feuilles mensuelles, avec plusieurs années. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.Calc = factory();
@@ -9,42 +9,27 @@
   const MONTH_TITLE = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const MONTH_SHORT = ['Jan', 'Feb', 'March', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+  /* ---------- Utilitaires ---------- */
   function parseNum(v) {
     if (v === null || v === undefined || v === '') return null;
     if (typeof v === 'number') return isFinite(v) ? v : null;
     const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.').replace('%', ''));
     return isFinite(n) ? n : null;
   }
-
-  function compact(arr) {
-    return (arr || []).map(parseNum).filter((x) => x !== null);
-  }
-
+  function compact(arr) { return (arr || []).map(parseNum).filter((x) => x !== null); }
   function sum(a) { return a.reduce((s, x) => s + x, 0); }
+  function cumulative(a) { const out = [0]; a.forEach((x) => out.push(out[out.length - 1] + x)); return out; }
+  function ratio(a, b) { return b ? a / b : null; }
+  const round2 = (v) => (v === null || v === undefined ? null : Math.round(v * 100) / 100);
 
-  function cumulative(a) {
-    const out = [0];
-    a.forEach((x) => out.push(out[out.length - 1] + x));
-    return out; // commence par 0 (ligne 4 du TRADE LOG)
-  }
-
-  /** Série d'un mois (ou globale) à partir des RR saisis et du risque par trade ($). */
+  /** Série d'un mois (ou globale) : RR saisis -> P&L en $, cumuls (commencent par 0). */
   function series(arr, risk) {
     const rr = compact(arr);
     const pnl = rr.map((x) => x * risk);
-    return {
-      rr,
-      pnl,
-      rrLead: [0].concat(rr),
-      pnlLead: [0].concat(pnl),
-      cumRR: cumulative(rr),
-      cumPnl: cumulative(pnl)
-    };
+    return { rr, pnl, rrLead: [0].concat(rr), pnlLead: [0].concat(pnl), cumRR: cumulative(rr), cumPnl: cumulative(pnl) };
   }
 
-  function ratio(a, b) { return b ? a / b : null; }
-
-  /** Statistiques d'un mois ou du global (feuilles JAN..DEC). */
+  /** Statistiques (feuilles JAN..DEC et indicateurs globaux). */
   function stats(arr, risk) {
     const s = series(arr, risk);
     const n = s.rr.length;
@@ -53,97 +38,150 @@
     const totLoss = 0 - sum(s.pnl.filter((x) => x < 0));
     const totProfit = sum(s.pnl.filter((x) => x >= 0));
     return {
-      series: s,
-      returnRR: sum(s.rr),
-      expectancy: n ? sum(s.rr) / n : null,
-      totalTrades: n,
-      losses,
-      wins,
-      pctLost: ratio(losses, n),
-      pctWon: ratio(wins, n),
-      totalLosses: totLoss,
-      totalProfits: totProfit,
-      net: sum(s.pnl),
-      lossPct: ratio(totLoss, totLoss + totProfit),
-      profitPct: ratio(totProfit, totLoss + totProfit)
+      series: s, returnRR: sum(s.rr), expectancy: n ? sum(s.rr) / n : null, totalTrades: n, losses, wins,
+      pctLost: ratio(losses, n), pctWon: ratio(wins, n), totalLosses: totLoss, totalProfits: totProfit, net: sum(s.pnl),
+      lossPct: ratio(totLoss, totLoss + totProfit), profitPct: ratio(totProfit, totLoss + totProfit)
     };
   }
 
-  /** Tableau client de P&L OUTLOOK : solde initial chaîné + performance totale. */
-  function clientTable(client) {
-    const balances = [];
-    client.rows.forEach((row, i) => {
-      if (i === 0) balances.push(parseNum(client.balance));
-      else {
-        const prev = balances[i - 1];
-        balances.push(prev === null ? null : prev + (parseNum(client.rows[i - 1].pl) || 0));
-      }
-    });
-    const total = sum(client.rows.map((r) => parseNum(r.perf)).filter((x) => x !== null));
-    return { balances, total };
-  }
-
-  function quarters(state) {
-    const perf = state.clients[0].rows.map((r) => parseNum(r.perf) || 0);
-    return [0, 3, 6, 9].map((i) => sum(perf.slice(i, i + 3)));
-  }
-
-  function monthlyAverage(state) {
-    const v = state.clients[0].rows.map((r) => parseNum(r.perf)).filter((x) => x !== null);
-    return v.length ? sum(v) / v.length : null;
-  }
-
-  function emptyClient(name, balance, risks, perf) {
+  /* ---------- Modèle d'une année ---------- */
+  function blankClient(name, balance, risks) {
     return {
-      name,
-      balance,
-      rows: Array.from({ length: 12 }, (_, i) => ({
-        pl: null,
-        perf: perf === undefined ? null : perf,
-        risk: risks[i] === undefined ? null : risks[i]
-      }))
+      name, balance: balance === undefined ? null : balance,
+      rows: Array.from({ length: 12 }, (_, i) => ({ risk: risks && risks[i] !== undefined ? risks[i] : null }))
     };
   }
 
-  /** Données de départ = contenu du classeur Excel fourni. */
-  function defaultState() {
+  /** Données du classeur Excel d'origine (année 2022). */
+  function defaultYearData() {
     return {
-      version: 1,
-      year: 2022,
-      risk: 500,
-      global: [3.2],
+      risk: 500, aum: '$100,000', notes: '',
       months: {
         jan: [3.2], feb: [-1], mar: [3.7], apr: [4.3], may: [-1], jun: [-1],
         jul: [3], aug: [-1], sep: [3.2], oct: [-0.6], nov: [-1], dec: [-1]
       },
-      aum: '$100,000',
-      notes: '',
       clients: [
-        emptyClient('Elliot (USD)', 100000, new Array(12).fill(0.5), 0.02),
-        emptyClient('Other (EUR)', null, [1, 1, 1, 1]),
-        emptyClient('Other (GBP)', null, [3.5, 3.5, 3.5])
+        blankClient('Elliot (USD)', 100000, new Array(12).fill(0.5)),
+        blankClient('Other (EUR)', null, [1, 1, 1, 1]),
+        blankClient('Other (GBP)', null, [3.5, 3.5, 3.5])
       ]
     };
   }
 
-  /** Complète un état chargé depuis le disque avec les valeurs manquantes. */
-  function normalize(s) {
-    const d = defaultState();
-    if (!s || typeof s !== 'object') return d;
-    const out = Object.assign({}, d, s);
-    out.months = Object.assign({}, d.months, s.months || {});
-    MONTHS.forEach((m) => { if (!Array.isArray(out.months[m])) out.months[m] = []; });
-    if (!Array.isArray(out.global)) out.global = [];
-    if (!Array.isArray(out.clients) || out.clients.length !== 3) out.clients = d.clients;
-    out.clients.forEach((c, i) => {
-      if (!Array.isArray(c.rows) || c.rows.length !== 12) c.rows = d.clients[i].rows;
-    });
+  function normalizeYear(y) {
+    const d = defaultYearData();
+    const out = {
+      risk: parseNum(y && y.risk) === null ? 500 : parseNum(y.risk),
+      aum: y && typeof y.aum === 'string' ? y.aum : '',
+      notes: y && typeof y.notes === 'string' ? y.notes : '',
+      months: {},
+      clients: []
+    };
+    MONTHS.forEach((m) => { out.months[m] = y && y.months && Array.isArray(y.months[m]) ? y.months[m].slice() : []; });
+    for (let i = 0; i < 3; i++) {
+      const c = y && Array.isArray(y.clients) ? y.clients[i] : null;
+      out.clients.push({
+        name: c && c.name ? String(c.name) : d.clients[i].name,
+        balance: c ? parseNum(c.balance) : null,
+        rows: Array.from({ length: 12 }, (_, k) => ({ risk: c && c.rows && c.rows[k] ? parseNum(c.rows[k].risk) : null }))
+      });
+    }
+    if (y && Array.isArray(y._ancienGlobal)) out._ancienGlobal = y._ancienGlobal.slice();
     return out;
+  }
+
+  /**
+   * Calcule tout ce qui est affiché pour une année.
+   *  - Le global = tous les trades des 12 mois mis bout à bout (plus de double saisie).
+   *  - Client 1 (compte du TRADE LOG) : P&L $ = somme des P&L du mois ; Performance = P&L / solde ;
+   *    Risk/trade % = risque $ / solde.
+   *  - Autres clients : Performance = somme des RR du mois x Risk/trade % ; P&L $ = Performance x solde.
+   *  - Solde initial du mois suivant = solde + P&L.
+   */
+  function compute(y) {
+    const risk = parseNum(y.risk) || 0;
+    const ms = MONTHS.map((m) => stats(y.months[m], risk));
+    const allRR = [].concat.apply([], MONTHS.map((m) => compact(y.months[m])));
+    const global = stats(allRR, risk);
+    const clients = y.clients.map((c, ci) => {
+      const balances = [], pnl = [], perf = [], riskPct = [];
+      let b = parseNum(c.balance);
+      for (let i = 0; i < 12; i++) {
+        balances.push(b);
+        let p = null, pc = null, rp = null;
+        if (ci === 0) {
+          p = ms[i].net;
+          rp = b ? (risk / b) * 100 : null;
+          pc = b ? p / b : null;
+        } else {
+          rp = parseNum(c.rows[i].risk);
+          pc = rp === null ? null : (ms[i].returnRR * rp) / 100;
+          p = pc === null || !b ? null : pc * b;
+        }
+        pnl.push(p); perf.push(pc); riskPct.push(rp);
+        b = b === null ? null : b + (p || 0);
+      }
+      return { balances, pnl, perf, riskPct, total: sum(perf.filter((x) => x !== null)), closing: b };
+    });
+    const main = clients[0].perf;
+    const withTrades = main.filter((v, i) => v !== null && ms[i].totalTrades > 0);
+    const quarters = [0, 3, 6, 9].map((i) => sum(main.slice(i, i + 3).map((v) => v || 0)));
+    return {
+      ms, allRR, global, clients, quarters,
+      monthlyAvg: withTrades.length ? sum(withTrades) / withTrades.length : null
+    };
+  }
+
+  /* ---------- Base multi-années ---------- */
+  function yearKeys(db) { return Object.keys(db.years).sort((a, b) => Number(a) - Number(b)); }
+
+  function defaultDb() { return { version: 2, currentYear: '2022', years: { '2022': defaultYearData() } }; }
+
+  /** Nouvelle année : soldes de départ = soldes de fin de l'année précédente, réglages de risque repris. */
+  function createYear(db, yearKey) {
+    const y = Number(yearKey);
+    const keys = yearKeys(db).map(Number);
+    const earlier = keys.filter((k) => k < y);
+    const prevKey = String(earlier.length ? Math.max.apply(null, earlier) : Math.max.apply(null, keys));
+    const base = db.years[prevKey];
+    const comp = compute(base);
+    return {
+      risk: base.risk, aum: base.aum, notes: '',
+      months: MONTHS.reduce((o, m) => { o[m] = []; return o; }, {}),
+      clients: base.clients.map((c, ci) => ({
+        name: c.name,
+        balance: earlier.length ? round2(comp.clients[ci].closing) : c.balance,
+        rows: c.rows.map((r) => ({ risk: r.risk }))
+      }))
+    };
+  }
+
+  /** Charge n'importe quelle sauvegarde (ancien format 1 année ou nouveau format multi-années). */
+  function normalizeDb(saved) {
+    if (!saved || typeof saved !== 'object') return defaultDb();
+    if (saved.years && typeof saved.years === 'object' && Object.keys(saved.years).length) {
+      const db = { version: 2, currentYear: '', years: {} };
+      Object.keys(saved.years).forEach((k) => { if (/^\d{4}$/.test(k)) db.years[k] = normalizeYear(saved.years[k]); });
+      const keys = yearKeys(db);
+      if (!keys.length) return defaultDb();
+      db.currentYear = db.years[String(saved.currentYear)] ? String(saved.currentYear) : keys[keys.length - 1];
+      return db;
+    }
+    if (saved.months) { // ancien format : une seule année
+      const key = String(parseInt(saved.year, 10) || 2022);
+      const yd = normalizeYear(saved);
+      if (Array.isArray(saved.global) && saved.global.length) yd._ancienGlobal = saved.global.slice();
+      const db = { version: 2, currentYear: key, years: {} };
+      db.years[key] = yd;
+      if (key !== '2022') db.years['2022'] = defaultYearData();
+      return db;
+    }
+    return defaultDb();
   }
 
   return {
     MONTHS, TAB_LABELS, MONTH_FULL, MONTH_TITLE, MONTH_SHORT,
-    parseNum, compact, sum, series, stats, clientTable, quarters, monthlyAverage,
-    defaultState, normalize
+    parseNum, compact, sum, series, stats, compute,
+    defaultYearData, defaultDb, normalizeYear, normalizeDb, createYear, yearKeys
   };
 });
