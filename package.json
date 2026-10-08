@@ -16,8 +16,16 @@
   "build": {
     "appId": "com.kodjo.forexprotradertracker",
     "productName": "Forex Pro Trader Tracker",
-    "directories": { "output": "dist" },
-    "files": ["main.js", "preload.js", "src/**/*", "build/icon.png"],
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "src/**/*",
+      "build/**/*"
+    ],
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
