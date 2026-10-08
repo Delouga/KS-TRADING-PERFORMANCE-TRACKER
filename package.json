@@ -22,13 +22,19 @@
     "files": [
       "main.js",
       "preload.js",
-      "package.json",
-      "src/**/*",
-      "build/**/*"
+      "index.html",
+      "styles.css",
+      "app.js",
+      "calc.js",
+      "charts.js",
+      "logo.png",
+      "icon.png",
+      "icon.ico",
+      "package.json"
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "icon.ico"
     },
     "nsis": {
       "oneClick": false,
