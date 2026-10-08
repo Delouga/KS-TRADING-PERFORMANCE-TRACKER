@@ -1,0 +1,35 @@
+FOREX PRO TRADER TRACKER - version logiciel Windows
+=====================================================
+
+Ce projet est la transformation de ton fichier Excel
+"Track Record Update - YoungTraderWealth" en application de bureau.
+
+COMMENT OBTENIR LE SETUP (.exe)
+-------------------------------
+1. Installe Node.js (version LTS) : https://nodejs.org   (une seule fois)
+2. Dezippe ce dossier, puis double-clique sur  INSTALLER.bat
+   (il telecharge les outils, puis cree le setup - compte quelques minutes)
+3. Le setup apparait dans le dossier  dist\
+   -> "Forex Pro Trader Tracker Setup 1.0.0.exe"
+4. Double-clique dessus pour installer le logiciel. Un raccourci est cree
+   sur le bureau.
+
+Remarque : Windows peut afficher "Windows a protege votre ordinateur"
+(SmartScreen) car le setup n'est pas signe numeriquement. Clique sur
+"Informations complementaires" puis "Executer quand meme".
+
+Pour tester sans installer : double-clique sur  LANCER.bat
+
+TES DONNEES
+-----------
+- Tout est enregistre automatiquement sur ton ordinateur.
+- Menu Fichier > Exporter une sauvegarde... pour faire une copie (.json)
+- Menu Fichier > Importer une sauvegarde... pour la restaurer.
+- Les donnees du classeur Excel d'origine sont deja chargees.
+
+CE QUI A ETE REPRODUIT
+----------------------
+- P&L OUTLOOK : 3 tableaux clients (USD / EUR / GBP), indicateurs, graphiques
+  generaux, 12 graphiques mensuels, performance trimestrielle, notes.
+- TRADE LOG : risque par trade, colonnes globales et mensuelles, calculs.
+- JAN a DEC : Return RR, Return %, expectancy, hit rate, profits/pertes.
