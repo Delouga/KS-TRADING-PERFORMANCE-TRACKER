@@ -3,6 +3,49 @@ const path = require('path');
 const fs = require('fs');
 
 const dataFile = () => path.join(app.getPath('userData'), 'donnees.json');
+
+// Langue du menu et des boîtes de dialogue (changée depuis l'interface via le sélecteur FR / EN)
+let LANG = 'fr';
+const TR = {
+  fr: {
+    menuFile: 'Fichier', exportItem: 'Exporter une sauvegarde…', importItem: 'Importer une sauvegarde…', quit: 'Quitter',
+    menuView: 'Affichage', zoomIn: 'Zoom avant', zoomOut: 'Zoom arrière', zoomReset: 'Zoom normal', fullscreen: 'Plein écran',
+    exportTitle: 'Exporter une sauvegarde', exportFile: 'sauvegarde-track-record.json', importTitle: 'Importer une sauvegarde',
+    filter: 'Sauvegarde JSON', exportFail: 'Export impossible', importFail: 'Import impossible',
+    importInvalid: "Ce fichier n'est pas une sauvegarde valide."
+  },
+  en: {
+    menuFile: 'File', exportItem: 'Export a backup…', importItem: 'Import a backup…', quit: 'Quit',
+    menuView: 'View', zoomIn: 'Zoom in', zoomOut: 'Zoom out', zoomReset: 'Actual size', fullscreen: 'Full screen',
+    exportTitle: 'Export a backup', exportFile: 'track-record-backup.json', importTitle: 'Import a backup',
+    filter: 'JSON backup', exportFail: 'Export failed', importFail: 'Import failed',
+    importInvalid: 'This file is not a valid backup.'
+  }
+};
+const tr = (k) => TR[LANG][k];
+
+// Dossier de données au nouveau nom du logiciel. Les données de l'ancien dossier
+// ("Forex Pro Trader Tracker") sont reprises automatiquement au premier lancement (l'ancien dossier n'est pas touché).
+(function reprendreDonnees() {
+  const base = app.getPath('appData');
+  const nouveauDir = path.join(base, 'KS TRADING PERFORMANCE TRACKER');
+  app.setPath('userData', nouveauDir);
+  let ancienDir = null;
+  try {
+    if (fs.existsSync(path.join(nouveauDir, 'donnees.json'))) return;
+    ancienDir = ['Forex Pro Trader Tracker', 'forex-pro-trader-tracker']
+      .map((n) => path.join(base, n))
+      .find((d) => fs.existsSync(path.join(d, 'donnees.json'))) || null;
+    if (!ancienDir) return;
+    fs.mkdirSync(nouveauDir, { recursive: true });
+    fs.readdirSync(ancienDir).forEach((f) => {
+      if (/^donnees.*\.json$/.test(f)) fs.copyFileSync(path.join(ancienDir, f), path.join(nouveauDir, f));
+    });
+  } catch (e) {
+    // En cas de problème, on continue avec l'ancien dossier pour ne rien perdre
+    if (ancienDir) app.setPath('userData', ancienDir);
+  }
+})();
 let win = null;
 
 function createWindow() {
@@ -12,7 +55,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     backgroundColor: '#3f3f3f',
-    title: 'Forex Pro Trader Tracker',
+    title: 'KS TRADING PERFORMANCE TRACKER',
     icon: path.join(__dirname, 'icon.png'),
 
     webPreferences: {
@@ -31,7 +74,7 @@ function createWindow() {
   const indexPath = path.join(__dirname, 'index.html');
 
   console.log('========================================');
-  console.log('FOREX PRO TRADER TRACKER');
+  console.log('KS TRADING PERFORMANCE TRACKER');
   console.log('========================================');
   console.log('Application path :', __dirname);
   console.log('Index path       :', indexPath);
@@ -184,18 +227,18 @@ function buildMenu() {
   const template = [
 
     {
-      label: 'Fichier',
+      label: tr('menuFile'),
 
       submenu: [
 
         {
-          label: 'Exporter une sauvegarde…',
+          label: tr('exportItem'),
           accelerator: 'CmdOrCtrl+E',
           click: exportData
         },
 
         {
-          label: 'Importer une sauvegarde…',
+          label: tr('importItem'),
           accelerator: 'CmdOrCtrl+I',
           click: importData
         },
@@ -206,30 +249,30 @@ function buildMenu() {
 
         {
           role: 'quit',
-          label: 'Quitter'
+          label: tr('quit')
         }
 
       ]
     },
 
     {
-      label: 'Affichage',
+      label: tr('menuView'),
 
       submenu: [
 
         {
           role: 'zoomIn',
-          label: 'Zoom avant'
+          label: tr('zoomIn')
         },
 
         {
           role: 'zoomOut',
-          label: 'Zoom arrière'
+          label: tr('zoomOut')
         },
 
         {
           role: 'resetZoom',
-          label: 'Zoom normal'
+          label: tr('zoomReset')
         },
 
         {
@@ -238,7 +281,7 @@ function buildMenu() {
 
         {
           role: 'togglefullscreen',
-          label: 'Plein écran'
+          label: tr('fullscreen')
         }
 
       ]
@@ -264,13 +307,13 @@ async function exportData() {
     filePath
   } = await dialog.showSaveDialog(win, {
 
-    title: 'Exporter une sauvegarde',
+    title: tr('exportTitle'),
 
-    defaultPath: 'sauvegarde-track-record.json',
+    defaultPath: tr('exportFile'),
 
     filters: [
       {
-        name: 'Sauvegarde JSON',
+        name: tr('filter'),
         extensions: ['json']
       }
     ]
@@ -295,7 +338,7 @@ async function exportData() {
   } catch (e) {
 
     dialog.showErrorBox(
-      'Export impossible',
+      tr('exportFail'),
       String(e.message || e)
     );
   }
@@ -314,13 +357,13 @@ async function importData() {
     filePaths
   } = await dialog.showOpenDialog(win, {
 
-    title: 'Importer une sauvegarde',
+    title: tr('importTitle'),
 
     properties: ['openFile'],
 
     filters: [
       {
-        name: 'Sauvegarde JSON',
+        name: tr('filter'),
         extensions: ['json']
       }
     ]
@@ -346,8 +389,8 @@ async function importData() {
   } catch (e) {
 
     dialog.showErrorBox(
-      'Import impossible',
-      'Ce fichier n\'est pas une sauvegarde valide.'
+      tr('importFail'),
+      tr('importInvalid')
     );
   }
 }
@@ -387,6 +430,11 @@ ipcMain.handle(
 // =========================================================
 // SAUVEGARDE DES DONNÉES
 // =========================================================
+
+ipcMain.on('lang:set', (_evt, l) => {
+  LANG = l === 'en' ? 'en' : 'fr';
+  buildMenu();
+});
 
 ipcMain.handle(
   'data:save',

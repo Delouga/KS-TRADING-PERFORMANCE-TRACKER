@@ -1,6 +1,6 @@
 {
-  "name": "forex-pro-trader-tracker",
-  "productName": "Forex Pro Trader Tracker",
+  "name": "ks-trading-performance-tracker",
+  "productName": "KS TRADING PERFORMANCE TRACKER",
   "version": "1.0.0",
   "description": "Suivi de performance de trading (Track Record)",
   "author": "Kodjo",
@@ -15,7 +15,7 @@
   },
   "build": {
     "appId": "com.kodjo.forexprotradertracker",
-    "productName": "Forex Pro Trader Tracker",
+    "productName": "KS TRADING PERFORMANCE TRACKER",
     "directories": {
       "output": "dist"
     },
@@ -42,7 +42,7 @@
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Forex Pro Trader Tracker"
+      "shortcutName": "KS TRADING PERFORMANCE TRACKER"
     }
   }
 }

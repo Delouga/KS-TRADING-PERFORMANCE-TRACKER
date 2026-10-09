@@ -1,5 +1,5 @@
 @echo off
-title Test - Forex Pro Trader Tracker
+title Test - KS TRADING PERFORMANCE TRACKER
 cd /d "%~dp0"
 where node >nul 2>nul
 if errorlevel 1 (

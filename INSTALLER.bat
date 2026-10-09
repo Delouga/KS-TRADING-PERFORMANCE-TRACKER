@@ -1,5 +1,5 @@
 @echo off
-title Creation du setup - Forex Pro Trader Tracker
+title Creation du setup - KS TRADING PERFORMANCE TRACKER
 cd /d "%~dp0"
 where node >nul 2>nul
 if errorlevel 1 (

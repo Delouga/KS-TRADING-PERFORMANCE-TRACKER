@@ -43,6 +43,12 @@ body {
 .btn.ghost { background: transparent; color: var(--muted); border: 1px solid #666; }
 .btn:disabled { opacity: .35; cursor: default; filter: none; }
 
+/* ---------- Sélecteur de langue ---------- */
+.langsw { display: flex; gap: 0; }
+.langsw .btn { background: transparent; color: var(--muted); border: 1px solid #666; padding: 5px 12px; font-size: 13px; }
+.langsw .btn + .btn { border-left: 0; }
+.langsw .btn.on { background: var(--orange); color: #000; border-color: var(--orange); }
+
 /* ---------- Fenêtre modale ---------- */
 #modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 50; }
 #modal[hidden] { display: none; }
@@ -97,6 +103,8 @@ body {
 .kpi { background: var(--cell2); border: 1px solid #1a1a1a; padding: 10px 12px; text-align: center; color: var(--muted); }
 .kpi .v { color: #fff; margin-top: 4px; font-size: 22px; font-weight: 700; }
 .kpi .v.g { color: var(--greenlight); }
+.kpi .v.r { color: #ff6b6b; }
+.kpi.accent { border-color: var(--orange); }
 .kpi input { width: 100%; background: transparent; color: #fff; border: 0; border-bottom: 1px solid #777; text-align: center; font: 700 18px Calibri, "Segoe UI", Arial, sans-serif; }
 
 .ol-grid { display: grid; grid-template-columns: minmax(560px, 660px) minmax(0, 1fr); gap: 12px; align-items: start; }
@@ -113,6 +121,9 @@ h2.sec { margin: 22px 0 10px; font-size: 22px; letter-spacing: .5px; border-bott
   .banner .quotes { font-size: 14px; }
 }
 
+.cblock { min-width: 0; }
+.cur-row { display: flex; align-items: center; gap: 8px; padding: 0 0 5px; color: var(--muted); font-size: 13px; }
+.cur-row select { background: var(--cell); color: #fff; border: 1px solid #777; padding: 3px 8px; font: 13px Calibri, "Segoe UI", Arial, sans-serif; }
 .tbl-wrap { overflow-x: auto; }
 .ctbl { border-collapse: collapse; width: 100%; min-width: 560px; table-layout: fixed; }
 .ctbl td, .ctbl th { border: 1px solid #1a1a1a; padding: 0; height: 22px; }
@@ -143,13 +154,17 @@ h2.sec { margin: 22px 0 10px; font-size: 22px; letter-spacing: .5px; border-bott
 /* ====================== Feuilles mensuelles (responsive) ====================== */
 .month-title { margin: 0; padding: 18px 28px; font-size: 32px; font-weight: 700; border-bottom: 3px solid #1a1a1a; letter-spacing: .5px; }
 .month-title small { font-size: 18px; color: var(--orange); margin-left: 10px; }
-.month { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); align-items: start; }
-.month > div { min-width: 0; }
-.month .row3 { display: grid; grid-template-columns: 82px 1fr 82px 1fr 128px 1fr; }
-.month .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); }
-.month .grid5 .val { font-size: 15px; }
-.month .row3 .hd { text-align: left; white-space: nowrap; }
-@media (max-width: 560px) { .month { grid-template-columns: minmax(0, 1fr); } .month-title { font-size: 22px; padding: 12px 14px; } }
+h3.sub { margin: 14px 0 8px; font-size: 15px; font-weight: 700; color: var(--orange); letter-spacing: .6px; text-transform: uppercase; }
+h3.sub:first-child { margin-top: 0; }
+.kpis.m5 { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); }
+.mgrid { display: grid; gap: 12px; margin-top: 14px; grid-template-columns: 1.3fr 1.3fr 1fr 1fr; }
+.mgrid .chart { height: 330px; }
+@media (max-width: 1500px) { .mgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .mgrid { grid-template-columns: minmax(0, 1fr); } .mgrid .chart { height: 290px; } }
+@media (max-width: 560px) {
+  .month-title { font-size: 22px; padding: 12px 14px; }
+  .kpi .v { font-size: 18px; }
+}
 
 /* ====================== TRADE LOG ====================== */
 .tl-head { display: flex; align-items: center; background: #3f3f3f; border-bottom: 3px solid #1a1a1a; }

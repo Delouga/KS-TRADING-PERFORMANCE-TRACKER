@@ -7,7 +7,8 @@
   const TXT = '#d9d9d9';
   let uid = 0;
 
-  const nf = (v, d) => v.toLocaleString('fr-FR', { maximumFractionDigits: d === undefined ? 2 : d });
+  let LOC = 'fr-FR';
+  const nf = (v, d) => v.toLocaleString(LOC, { maximumFractionDigits: d === undefined ? 2 : d });
   const fmtAxis = (v) => nf(+v.toFixed(6));
   const fmtDollar = (v) => (v < 0 ? '-$' : '$') + nf(Math.abs(v), 0);
   const fmtPctInt = (v) => Math.round(v * 100) + '%';
@@ -181,5 +182,7 @@
       'M' + (cx - r) + ',' + cy + ' a' + r + ',' + r + ' 0 1,0 ' + 2 * r + ',0 a' + r + ',' + r + ' 0 1,0 ' + (-2 * r) + ',0 Z';
   }
 
-  root.Charts = { area, bar, donut, GREEN, RED, ORANGE, fmtDollar, fmtAxis, nf };
+  function setLocale(l) { LOC = l; }
+
+  root.Charts = { area, bar, donut, GREEN, RED, ORANGE, fmtDollar, fmtAxis, nf, setLocale };
 })(typeof self !== 'undefined' ? self : this);

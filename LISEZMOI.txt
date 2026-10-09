@@ -1,5 +1,5 @@
-FOREX PRO TRADER TRACKER - version logiciel Windows
-=====================================================
+KS TRADING PERFORMANCE TRACKER - version logiciel Windows
+============================================================
 
 Ce projet est la transformation de ton fichier Excel
 "Track Record Update - YoungTraderWealth" en application de bureau.
@@ -10,7 +10,7 @@ COMMENT OBTENIR LE SETUP (.exe)
 2. Dezippe ce dossier, puis double-clique sur  INSTALLER.bat
    (il telecharge les outils, puis cree le setup - compte quelques minutes)
 3. Le setup apparait dans le dossier  dist\
-   -> "Forex Pro Trader Tracker Setup 1.0.0.exe"
+   -> "KS TRADING PERFORMANCE TRACKER Setup 1.0.0.exe"
 4. Double-clique dessus pour installer le logiciel. Un raccourci est cree
    sur le bureau.
 

@@ -10,10 +10,17 @@
   const MONTH_SHORT = ['Jan', 'Feb', 'March', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   /* ---------- Utilitaires ---------- */
+  let LANG = 'fr';
+  function setLang(l) { LANG = l === 'en' ? 'en' : 'fr'; }
+
+  /** Lit un nombre saisi : "3,2" et "3.2" fonctionnent ; en anglais, "100,000" = cent mille. */
   function parseNum(v) {
     if (v === null || v === undefined || v === '') return null;
     if (typeof v === 'number') return isFinite(v) ? v : null;
-    const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.').replace('%', ''));
+    let t = String(v).replace(/[\s\u00a0\u202f]/g, '').replace('%', '').replace(/(CA|NZ|A|US)?\$|[€£¥]|CHF/gi, '');
+    if (LANG === 'en' && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/,/g, '');
+    else t = t.replace(',', '.');
+    const n = parseFloat(t);
     return isFinite(n) ? n : null;
   }
   function compact(arr) { return (arr || []).map(parseNum).filter((x) => x !== null); }
@@ -44,10 +51,14 @@
     };
   }
 
+  /** Devises majeures proposables pour un compte. */
+  const CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD'];
+  const DEFAULT_CCY = ['USD', 'EUR', 'GBP'];
+
   /* ---------- Modèle d'une année ---------- */
-  function blankClient(name, balance, risks) {
+  function blankClient(name, balance, risks, currency) {
     return {
-      name, balance: balance === undefined ? null : balance,
+      name, currency: currency || 'USD', balance: balance === undefined ? null : balance,
       rows: Array.from({ length: 12 }, (_, i) => ({ risk: risks && risks[i] !== undefined ? risks[i] : null }))
     };
   }
@@ -61,9 +72,9 @@
         jul: [3], aug: [-1], sep: [3.2], oct: [-0.6], nov: [-1], dec: [-1]
       },
       clients: [
-        blankClient('Elliot (USD)', 100000, new Array(12).fill(0.5)),
-        blankClient('Other (EUR)', null, [1, 1, 1, 1]),
-        blankClient('Other (GBP)', null, [3.5, 3.5, 3.5])
+        blankClient('Elliot (USD)', 100000, new Array(12).fill(0.5), 'USD'),
+        blankClient('Other (EUR)', null, [1, 1, 1, 1], 'EUR'),
+        blankClient('Other (GBP)', null, [3.5, 3.5, 3.5], 'GBP')
       ]
     };
   }
@@ -82,6 +93,7 @@
       const c = y && Array.isArray(y.clients) ? y.clients[i] : null;
       out.clients.push({
         name: c && c.name ? String(c.name) : d.clients[i].name,
+        currency: c && CURRENCIES.indexOf(c.currency) >= 0 ? c.currency : DEFAULT_CCY[i],
         balance: c ? parseNum(c.balance) : null,
         rows: Array.from({ length: 12 }, (_, k) => ({ risk: c && c.rows && c.rows[k] ? parseNum(c.rows[k].risk) : null }))
       });
@@ -135,7 +147,7 @@
   /* ---------- Base multi-années ---------- */
   function yearKeys(db) { return Object.keys(db.years).sort((a, b) => Number(a) - Number(b)); }
 
-  function defaultDb() { return { version: 2, currentYear: '2022', years: { '2022': defaultYearData() } }; }
+  function defaultDb() { return { version: 2, lang: 'fr', currentYear: '2022', years: { '2022': defaultYearData() } }; }
 
   /** Nouvelle année : soldes de départ = soldes de fin de l'année précédente, réglages de risque repris. */
   function createYear(db, yearKey) {
@@ -150,6 +162,7 @@
       months: MONTHS.reduce((o, m) => { o[m] = []; return o; }, {}),
       clients: base.clients.map((c, ci) => ({
         name: c.name,
+        currency: c.currency,
         balance: earlier.length ? round2(comp.clients[ci].closing) : c.balance,
         rows: c.rows.map((r) => ({ risk: r.risk }))
       }))
@@ -160,7 +173,7 @@
   function normalizeDb(saved) {
     if (!saved || typeof saved !== 'object') return defaultDb();
     if (saved.years && typeof saved.years === 'object' && Object.keys(saved.years).length) {
-      const db = { version: 2, currentYear: '', years: {} };
+      const db = { version: 2, lang: saved.lang === 'en' ? 'en' : 'fr', currentYear: '', years: {} };
       Object.keys(saved.years).forEach((k) => { if (/^\d{4}$/.test(k)) db.years[k] = normalizeYear(saved.years[k]); });
       const keys = yearKeys(db);
       if (!keys.length) return defaultDb();
@@ -171,7 +184,7 @@
       const key = String(parseInt(saved.year, 10) || 2022);
       const yd = normalizeYear(saved);
       if (Array.isArray(saved.global) && saved.global.length) yd._ancienGlobal = saved.global.slice();
-      const db = { version: 2, currentYear: key, years: {} };
+      const db = { version: 2, lang: saved.lang === 'en' ? 'en' : 'fr', currentYear: key, years: {} };
       db.years[key] = yd;
       if (key !== '2022') db.years['2022'] = defaultYearData();
       return db;
@@ -180,8 +193,8 @@
   }
 
   return {
-    MONTHS, TAB_LABELS, MONTH_FULL, MONTH_TITLE, MONTH_SHORT,
-    parseNum, compact, sum, series, stats, compute,
+    CURRENCIES, MONTHS, TAB_LABELS, MONTH_FULL, MONTH_TITLE, MONTH_SHORT,
+    setLang, parseNum, compact, sum, series, stats, compute,
     defaultYearData, defaultDb, normalizeYear, normalizeDb, createYear, yearKeys
   };
 });

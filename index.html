@@ -4,20 +4,24 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Forex Pro Trader Tracker</title>
+  <title>KS TRADING PERFORMANCE TRACKER</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header id="topbar">
-    <div class="brand">Forex Pro Trader Tracker</div>
-    <div class="yearnav">
-      <span class="lbl">Année</span>
-      <button id="y-prev" class="btn sm" title="Année précédente">&#8249;</button>
-      <select id="y-select" title="Choisir une année"></select>
-      <button id="y-next" class="btn sm" title="Année suivante">&#8250;</button>
+    <div class="brand">KS TRADING PERFORMANCE TRACKER</div>
+    <div class="langsw" role="group" aria-label="Language">
+      <button id="lang-fr" class="btn sm" data-lang="fr">FR</button>
+      <button id="lang-en" class="btn sm" data-lang="en">EN</button>
     </div>
-    <button id="y-new" class="btn">+ Nouvelle année</button>
-    <button id="y-del" class="btn ghost">Supprimer cette année</button>
+    <div class="yearnav">
+      <span class="lbl" data-i18n="year">Année</span>
+      <button id="y-prev" class="btn sm" data-i18n-title="prevYear" title="Année précédente">&#8249;</button>
+      <select id="y-select" data-i18n-title="chooseYear" title="Choisir une année"></select>
+      <button id="y-next" class="btn sm" data-i18n-title="nextYear" title="Année suivante">&#8250;</button>
+    </div>
+    <button id="y-new" class="btn" data-i18n="newYear">+ Nouvelle année</button>
+    <button id="y-del" class="btn ghost" data-i18n="delYear">Supprimer cette année</button>
   </header>
   <main id="view"></main>
   <nav id="tabs"></nav>
